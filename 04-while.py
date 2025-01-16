@@ -9,8 +9,6 @@ b=4
 salida 3+3+3+3=12
 '''
 
-
-
 x=0
 
 print('Dame dos numeros para multiplicarlos por suma')
