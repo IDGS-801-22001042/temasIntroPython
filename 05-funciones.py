@@ -1,6 +1,5 @@
 import os
 
-
 def funcion1():
     os.system('cls')
     num1=int(input("Numero 1: "))
