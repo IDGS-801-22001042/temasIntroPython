@@ -3,11 +3,11 @@ from io import open
 class Cinepolis:
     def __init__(self):
         self.compras = []
-        self.opcion = ""
         self.nombre = ""
         self.personas = 0
         self.boletos = 0
         self.total = 0.0
+        self.totalCorte = 0.0
         self.tarjeta = ""
 
     def menuPrincipal(self):
@@ -23,54 +23,58 @@ class Cinepolis:
                 self.terminarPrograma()
                 break
             else:
-                print("Opción inválida, intenta de nuevo.")
+                print("\nOpción inválida, intenta de nuevo.")
 
     def realizarCompra(self):
         self.nombre = input("\nNombre de la persona que compra: ")
 
+        self.personas = self.validarPersonas()
+        self.boletos = self.validarBoletos()
+
+        self.total = self.calcularTotal(self.boletos)
+
+        print("\n¿Desea pagar con efectivo o tarjeta Cineco?")
+        print("e)Efectivo")
+        print("t)Tarjeta Cineco")
+        self.tarjeta = input("Elige una opción: ").lower()
+        if self.tarjeta == "t":
+            self.total *= 0.9  
+
+        self.total = round(self.total, 2)
+
+        self.totalCorte += self.total 
+
+        self.compras.append((self.nombre, self.boletos, self.total))
+
+        print(f"\n{self.nombre}, el total a pagar por {self.boletos} boleto(s) es: ${self.total}\n")
+        self.guardarEnArchivo(self.nombre, self.boletos, self.total)
+
+    def validarPersonas(self):
         while True:
-            self.personas = int(input("¿Cuántas personas asistirán?: "))
-
-            if 1 <= self.personas <= 7:
-                self.boletos = self.validarBoletos()
-                self.total = self.calcularTotal(self.boletos)
-
-                self.tarjeta = input("¿Pagarás con tarjeta Cinepolis? (s/n): ").lower()
-                if self.tarjeta == "s":
-                    self.total *= 0.9
-
-                self.total = round(self.total, 2)
-
-                self.compras.append((self.nombre, self.boletos, self.total))
-
-                print(f"\n{self.nombre}, el total a pagar por {self.boletos} boleto(s) es: ${self.total}\n")
-                self.guardarEnArchivo(self.nombre, self.boletos, self.total)
-                break
+            personas = int(input("\n¿Cuántas personas asistirán?: "))
+            if 1 <= personas <= 7:
+                return personas
+            elif personas == "":
+                print("Caracteres inválidos")
             else:
-                print("Debes ingresar una cantidad entre 1 y 7.")
+                print("Deben ser entre 1 y 7 personas.")
 
     def validarBoletos(self):
         while True:
-            boletos = int(input("¿Cuántos boletos deseas comprar? (máximo 7 por persona): "))
+            boletos = int(input("\n¿Cuántos boletos deseas comprar? (máximo 7 por persona): "))
 
             if boletos <= 0:
-                print("Debes comprar al menos un boleto. Intenta de nuevo.")
-            elif boletos > 7:
-                print("No puedes comprar más de 7 boletos por persona. Intenta de nuevo.")
-            elif boletos < self.personas:
-                print("Cantidad insuficiente de boletos.")
-                opcion2 = int(input("¿Desea cambiar la cantidad de boletos o de personas?\n1. Boletos\n2. Personas\nElige una opción: "))
-                if opcion2 == 1:
+                print("Debes comprar al menos un boleto.")
+            elif boletos < self.personas or boletos > self.personas:
+                print("\nLa cantidad de boletos no coincide con la cantidad de personas.")
+                print("¿Qué deseas cambiar?")
+                print("1. Boletos")
+                print("2. Personas")
+                opcion = int(input("Elige una opción: "))
+                if opcion == 1:
                     continue  
-                elif opcion2 == 2:
-                    return self.realizarCompra()  
-            elif boletos > self.personas:
-                print("Cantidad excedente de boletos. Intenta de nuevo.")
-                opcion2 = int(input("¿Desea cambiar la cantidad de boletos o de personas?\n1. Boletos\n2. Personas\nElige una opción: "))
-                if opcion2 == 1:
-                    continue  
-                elif opcion2 == 2:
-                    return self.realizarCompra()  
+                elif opcion == 2:
+                    self.personas = self.validarPersonas()
             else:
                 return boletos
 
@@ -96,9 +100,13 @@ class Cinepolis:
         print("-" * 35)
         for compra in self.compras:
             nombre, boletos, total = compra
-            print(f"{nombre:<15}{boletos:<10}{total:<10}")
+            print(f"{nombre:<15}{boletos:<10}${total:<10.2f}")
+        print("-" * 35)
+        print(f"TOTAL GENERAL: --------- ${self.totalCorte:.2f}")  
 
-        print("\nGracias por utilizar el sistema de Cineco.")
+        print("\nGracias por utilizar el sistema de Cinepolis.")
+
+        
         with open("compras.txt", "w") as archivo:
             archivo.write("")
 
